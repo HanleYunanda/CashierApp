@@ -23,6 +23,7 @@ app.use(cookieParser())
 // Route
 app.use('/', require('./route/root'))
 
+app.use('/auth', require('./route/authRoute'))
 app.use('/product', require('./route/productRoute'))
 app.use('/user', require('./route/userRoute'))
 
