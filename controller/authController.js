@@ -25,7 +25,7 @@ const login = asyncHandler(async (req, res) => {
             email: user.email,
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1m' }
+        { expiresIn: '1d' }
     )
 
     // Create Refresh Token
@@ -35,7 +35,7 @@ const login = asyncHandler(async (req, res) => {
             email: user.email,
         },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '1d' }
+        { expiresIn: '7d' }
     )
 
     // Inject Refresh Token to Cookie
@@ -43,12 +43,12 @@ const login = asyncHandler(async (req, res) => {
         httpOnly: true, //accessible only by web server 
         secure: true, //https
         sameSite: 'None', //cross-site cookie 
-        maxAge: 24 * 60 * 60 * 1000 //cookie expiry: set to match refresh token expiry
+        maxAge: 7 * 24 * 60 * 60 * 1000 //cookie expiry: set to match refresh token expiry
     })
 
     return res.status(200).json({
         message: "Login success",
-        accessToken
+        token: accessToken
     })
 })
 

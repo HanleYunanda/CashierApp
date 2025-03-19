@@ -26,6 +26,7 @@ app.use('/', require('./route/root'))
 app.use('/auth', require('./route/authRoute'))
 app.use('/product', require('./route/productRoute'))
 app.use('/user', require('./route/userRoute'))
+app.use('/transaction', require('./route/transactionRoute'))
 
 app.all('*', (req, res) => {
     res.status(404).json({message: "404 Not Found"})
