@@ -1,6 +1,7 @@
 const Product = require('../model/Product')
 const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
+const { validationResult } = require('express-validator')
 
 const getAllProducts = asyncHandler(async (req, res) => {
     const products = await Product.find().lean()
@@ -10,6 +11,22 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
 const createProduct = asyncHandler(async (req, res) => {
     const { name, price, active } = req.body
+
+    const errors = validationResult(req)
+    
+    // Validation express-validator
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().reduce((acc, error) => {
+            if (!acc[error.path]) {
+                acc[error.path] = error.msg;
+            }
+            return acc;
+        }, {});
+        return res.status(400).json({
+            message: "Data is invalid",
+            errors: formattedErrors
+        })
+    }
 
     // Validation duplicate
     const duplicate = await Product.findOne({name}).lean().exec()
@@ -32,6 +49,22 @@ const updateProduct = asyncHandler(async (req, res) => {
     let productId = req.params.id
     const newData = req.body
 
+    const errors = validationResult(req)
+    
+    // Validation express-validator
+    if (!errors.isEmpty()) {
+        const formattedErrors = errors.array().reduce((acc, error) => {
+            if (!acc[error.path]) {
+                acc[error.path] = error.msg;
+            }
+            return acc;
+        }, {});
+        return res.status(400).json({
+            message: "Data is invalid",
+            errors: formattedErrors
+        })
+    }
+    
     if(mongoose.Types.ObjectId.isValid(productId)) {
         productId = new mongoose.Types.ObjectId(productId)
     } else {
@@ -42,7 +75,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     if(!product) {
         return res.status(400).json({ message: `Product with Id ${productId} not found` })
     }
-
+    
     let updated = null;
     try {
         product.name = newData.name
@@ -53,7 +86,7 @@ const updateProduct = asyncHandler(async (req, res) => {
         return res.status(500).json({
             message: `Update product failed`,
             error
-        })
+        });
     }
 
     return res.status(200).json({
@@ -92,9 +125,25 @@ const deleteProduct = asyncHandler(async (req, res) => {
     })
 })
 
+const getProduct = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    let product = null;
+    try {
+        product = await Product.findById(new mongoose.Types.ObjectId(id)).lean().exec();
+    } catch (error) {
+        return res.status(400).json({ message: `Product Id ${productId} is not valid` })
+    }
+    if(!product) {
+        return res.status(400).json({ message: `Product Id ${productId} is not found` })
+    }
+
+    return res.status(200).json(product);
+})
+
 module.exports = {
     getAllProducts,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getProduct,
 }
