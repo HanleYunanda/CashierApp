@@ -9,6 +9,9 @@ router.route('/')
     .get(transactionController.getAllTransactions)
     .post(transactionController.createTransaction)
 
+router.route('/report')
+    .post(transactionController.getTransactionReport)
+
 // router.route('/:id').put(transactionController.updateProduct)
 //     .delete(transactionController.deleteProduct)
 

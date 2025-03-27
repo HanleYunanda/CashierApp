@@ -83,7 +83,117 @@ const createTransaction = asyncHandler(async (req, res) => {
     });
 })
 
+const getProductReport = null;
+
+const getTransactionReport = asyncHandler(async (req, res) => {
+    let { periodStart, periodEnd } = req.body;
+    periodStart = moment(periodStart).toDate();
+    periodEnd = moment(periodEnd).toDate();
+
+    const transactions = await Transaction.find({
+        createdAt: {
+            $gte: periodStart,
+            $lte: periodEnd,
+        }
+    });
+
+    const productsReport = await Transaction.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $gte: periodStart,
+                    $lte: periodEnd,
+                }
+            }
+        },
+        {
+            $unwind: "$transactionDetails"
+        },
+        {
+            $group: {
+              _id: "$transactionDetails.productId", // Group by productId
+              totalQuantity: { $sum: "$transactionDetails.quantity" },  // Sum of quantity for each product
+              totalSubTotal: { $sum: "$transactionDetails.subTotal" }   // Sum of subTotal for each product
+
+            }
+        },
+        {
+            $sort: { totalSubTotal: -1 }
+        },
+        {
+            $lookup: {
+                from: "products",  // The collection you want to join with
+                localField: "_id",  // The field in the current collection (Transaction) to join on
+                foreignField: "_id",  // The field in the "products" collection to join on
+                as: "product"  // The name of the new array field that will contain the joined documents
+            }
+        },
+        {
+            $unwind: {
+                path: "$product",  // Unwind the productDetails array so that we can access the fields directly
+                preserveNullAndEmptyArrays: true  // Optionally preserve entries where no matching product was found
+            }
+        },
+        {
+            $project: {
+                productId: "$_id",  // Include the productId in the final result
+                productName: "$product.name",  // Assuming the product collection has a "name" field
+                totalQuantity: 1,
+                totalSubTotal: 1,
+                _id: 0,
+            }
+        }
+    ]).exec();
+
+    const salesReport = await Transaction.aggregate([
+        {
+            $match: {
+                createdAt: {
+                    $gte: periodStart,
+                    $lte: periodEnd
+                }
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    year: { $year: "$createdAt" },  // Extract year from createdAt
+                    month: { $month: "$createdAt" }  // Extract month from createdAt
+                },
+                transactionCount: { $sum: 1 }  // Count number of transactions
+            }
+        },
+        {
+            $project: {
+                _id: {
+                    $concat: [
+                        { $toString: "$_id.year" },
+                        "-",
+                        {
+                            $cond: {
+                                if: {
+                                    $lt: ["$_id.month", 10]
+                                },
+                                then: {
+                                    $concat: ["0", { $toString: "$_id.month" }]
+                                },
+                                else: {
+                                    $toString: "$_id.month"
+                                }
+                            }
+                        }
+                    ]
+                },
+                transactionCount: 1
+            }
+        }
+    ]).exec();
+    
+    return res.status(200).json({ transactions, salesReport, productsReport });
+});
+
 module.exports = {
     getAllTransactions,
-    createTransaction
+    createTransaction,
+    getTransactionReport
 };
