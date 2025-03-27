@@ -14,7 +14,20 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate } from 'react-router-dom';
 
-const pages = ['Cashier', 'Pricing', 'Blog'];
+const pages = [
+    {
+        name: 'Cashier',
+        path: 'cashier'
+    },
+    {
+        name: 'Product',
+        path: 'product'
+    },
+    {
+        name: 'Transaction',
+        path: 'transaction/report'
+    },
+]; //'Cashier', 'Product', 'Transaction'
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Navbar() {
@@ -78,8 +91,8 @@ function Navbar() {
                     sx={{ display: { xs: 'block', md: 'none' } }}
                 >
                     {pages.map((page) => (
-                    <MenuItem key={page} onClick={() => {handleCloseNavMenu(); goToPage(page);}}>
-                        <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+                    <MenuItem key={page.name} onClick={() => {handleCloseNavMenu(); goToPage(page.path);}}>
+                        <Typography sx={{ textAlign: 'center' }}>{page.name}</Typography>
                     </MenuItem>
                     ))}
                 </Menu>
@@ -91,11 +104,11 @@ function Navbar() {
                 <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {pages.map((page) => (
                     <Button
-                    key={page}
-                    onClick={() => {handleCloseNavMenu(); goToPage(page);}}
+                    key={page.name}
+                    onClick={() => {handleCloseNavMenu(); goToPage(page.path);}}
                     sx={{ my: 2, color: 'white', display: 'block' }}
                     >
-                    {page}
+                    {page.name}
                     </Button>
                 ))}
                 </Box>

@@ -26,7 +26,7 @@ function CashierPage() {
         }
 
         fetchProducts();
-    }, [products, token]);
+    }, [token]);
 
     return (
         <Box sx={{ my: 3 }}>
