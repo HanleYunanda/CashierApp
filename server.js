@@ -17,7 +17,9 @@ connectDb()
 // Middleware
 app.use(logger)
 app.use(cors(corsOptions))
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json())
+app.use(express.static('public'))
 app.use(cookieParser())
 
 // Route

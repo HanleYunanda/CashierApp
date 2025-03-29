@@ -3,15 +3,16 @@ const router = express.Router()
 const productController = require('../controller/productController')
 const verifyJWT = require('../middleware/verifyJwt')
 const productValidator = require('../validator/productValidator')
+const upload = require('../config/multerConfig')
 
 router.use(verifyJWT)
 
 router.route('/')
     .get(productController.getAllProducts)
-    .post(productValidator, productController.createProduct)
+    .post(upload.single('imageFile'), productValidator, productController.createProduct)
 
 router.route('/:id')
-    .put(productValidator, productController.updateProduct)
+    .put(upload.single('imageFile'), productValidator, productController.updateProduct)
     .delete(productController.deleteProduct)
     .get(productController.getProduct)
 

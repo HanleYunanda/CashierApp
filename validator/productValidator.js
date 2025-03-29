@@ -11,6 +11,8 @@ const productValidator = [
 
     // Active
     body('active', 'Status value is invalid').isBoolean(),
+
+    
 ];
 
 module.exports = productValidator;
