@@ -13,33 +13,40 @@ import {
 } from '@mui/material';
 import {  useState } from 'react';
 import { useSelector } from 'react-redux';
+import UploadImage from '../../component/UploadImage';
 
 
 function CreatePage() {
 
     const token = useSelector((state) => state.auth.token);
-    const [product, setProduct] = useState({});
+    const [product, setProduct] = useState({
+        name: null,
+        price: null,
+        active: false,
+        imageFile: null
+    });
     const [saveMsg, setSaveMsg] = useState('');
     const [errors, setErrors] = useState({});
 
     const handleSave = () => {
+        const formData = new FormData();
+        formData.append('name', product.name);
+        formData.append('price', product.price);
+        formData.append('active', product.active);
+        formData.append('imageFile', product.imageFile);
+        
         const fetchData = async() => {
             const response = await fetch('http://localhost:3500/product', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token,
                 },
-                body: JSON.stringify({
-                    name: product.name,
-                    price: product.price,
-                    active: product.active,
-                })
+                body: formData
             });
 
             const data = await response.json();
-            if(response.status == 200) {
-                setSaveMsg(<Alert severity="success" sx={{ mb: 5 }}>{data.message}</Alert>)
+            if(response.status == 201) {
+                setSaveMsg(<Alert severity="success" sx={{ mb: 5 }}>{"Successfully create product"}</Alert>)
             
             }
             else if(response.status == 400 && data.errors) {
@@ -47,15 +54,20 @@ function CreatePage() {
                 setErrors(data.errors);
             }
             else {
-                setSaveMsg(<Alert severity="error" sx={{ mb: 5 }}>{data.message}</Alert>)
+                setSaveMsg(<Alert severity="error" sx={{ mb: 5 }}>{"Server error"}</Alert>)
             }
         }
 
         try {
             fetchData();
+            console.log(formData);
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const handleFileSelect = (uploadedFile) => {
+        setProduct({...product, imageFile: uploadedFile});
     }
 
     return (
@@ -110,6 +122,9 @@ function CreatePage() {
                                 setProduct({...product, active: e.target.checked});
                             }}
                         />
+                    </Box>
+                    <Box>
+                        <UploadImage onFileSelect={handleFileSelect}></UploadImage>
                     </Box>
                 </CardContent>
                 <CardActions>

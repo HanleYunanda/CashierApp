@@ -3,7 +3,8 @@ import {
     Card,
     CardHeader,
     CardContent,
-    Button, Typography
+    Button, Typography,
+    Alert
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -97,7 +98,9 @@ function ListProductPage() {
 
     }, [token]);
 
-    let table = <p>No data</p>;
+    let table = (
+        <Alert severity="info">No data available</Alert>
+    );
     if(!isLoading) {
         if(data.length != 0) {
             table = <CustomTable cols={cols} data={data}></CustomTable>;

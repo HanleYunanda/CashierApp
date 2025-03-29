@@ -11,20 +11,27 @@ import {
     Button,
     Alert,
     FormHelperText,
+    Avatar,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-
+import UploadImage from '../../component/UploadImage';
 
 function EditPage() {
 
     const { id } = useParams();
     const token = useSelector((state) => state.auth.token);
-    const [product, setProduct] = useState(null);
+    const [product, setProduct] = useState({
+        name: '',
+        price: '',
+        active: false,
+        image: null
+    });
     const [saveMsg, setSaveMsg] = useState('');
     const [errors, setErrors] = useState({});
 
+    console.log(product)
     useEffect(() => {
         const fetchData = async () => {
             const response = await fetch('http://localhost:3500/product/'+id, {
@@ -52,22 +59,24 @@ function EditPage() {
     }, [token]);
 
     const handleSave = () => {
+
+        const formData = new FormData();
+        formData.append('name', product.name);
+        formData.append('price', product.price);
+        formData.append('active', product.active);
+        formData.append('imageFile', product.image);
+
         const fetchData = async() => {
             const response = await fetch('http://localhost:3500/product/'+id, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token,
                 },
-                body: JSON.stringify({
-                    name: product.name,
-                    price: product.price,
-                    active: product.active,
-                })
+                body: formData
             });
 
             const data = await response.json();
-            if(response.status == 201) {
+            if(response.status == 200) {
                 setSaveMsg(<Alert severity="success" sx={{ mb: 5 }}>{data.message}</Alert>)
             
             }
@@ -85,6 +94,10 @@ function EditPage() {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    const handleFileSelect = (uploadedFile) => {
+        setProduct({...product, image: uploadedFile});
     }
 
     return (
@@ -139,6 +152,9 @@ function EditPage() {
                                 setProduct({...product, active: e.target.checked});
                             }}
                         />
+                    </Box>
+                    <Box>
+                        <UploadImage onFileSelect={handleFileSelect} imagePath={product?.image}></UploadImage>
                     </Box>
                 </CardContent>
                 <CardActions>

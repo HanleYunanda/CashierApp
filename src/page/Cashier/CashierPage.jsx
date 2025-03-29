@@ -1,7 +1,6 @@
 import { Box, Stack, Divider } from '@mui/material';
 import { ProductSection } from './ProductSection';
 import { TransactionSection } from './TransactionSection';
-import { useLoaderData } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -16,11 +15,12 @@ function CashierPage() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token,
-                }
+                },
             });
 
             if(response.ok) {
-                const data = await response.json();
+                let data = await response.json();
+                data = data.filter(item => item.active === true);
                 setProducts(data);
             }
         }

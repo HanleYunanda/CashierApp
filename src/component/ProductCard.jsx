@@ -24,9 +24,9 @@ export default function ProductCard({ product }) {
             <Card sx={{ width: 250 }}>
                 <CardMedia
                     component="img"
-                    alt="green iguana"
+                    alt={product.name}
                     height="130"
-                    image={coffee}
+                    image={'http://localhost:3500/' + product.image}
                 />
                 <CardContent>
                     <Typography variant="h5" component="div">
